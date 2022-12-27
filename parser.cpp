@@ -1,4 +1,3 @@
-// reading a text file
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,6 +9,8 @@
 #include <algorithm>
 #include <assert.h>
 #include <stdio.h>
+//#include <osg/PositionAttitudeTransform>
+//if (Itemize* child_itemize = dynamic_cast<Itemize*>(i)) {  }
 
 const std::string begin_cmd =  "begin{itemize}";
 const std::string end_cmd =  "end{itemize}";
@@ -18,6 +19,7 @@ const std::string item_cmd =  "item";
 class Item {
   private:
     std::string text;
+    std::string indent;
 
   public:
     Item(std::string item_text) {
@@ -29,7 +31,14 @@ class Item {
     }
 
     void print() {
+      std::cout << indent;
+      std::cout << "* ";
       std::cout << text << '\n';
+    }
+
+    void increase_indent(std::string ind) {
+      indent = ind;
+      indent += "\t";
     }
 };
 
@@ -39,23 +48,35 @@ struct PrintVisitor
   template <class T>
   void operator()(T&& _in){ _in.print(); }
 };
+struct IncreaseIndentVisitor
+{
+  std::string indent;
+  template <class T>
+  void operator()(T&& _in){ _in.increase_indent(indent); }
+};
+
 
 class Itemize {
   private:
     std::vector<std::variant<Itemize, Item>> items_list;
+    std::string indent;
 
   public:
     void print() {
-      
-      std::cout << "Begin Itemize:" << '\n';
+      Itemize child_itemize;
       for(auto& i : items_list) {
+        std::visit(IncreaseIndentVisitor{indent}, i);
         std::visit(PrintVisitor{}, i);
       }
-      std::cout << "End Itemize:" << '\n';
     }
 
     void add(std::variant<Itemize, Item> obj) {
       items_list.push_back(obj);
+    }
+
+    void increase_indent(std::string ind) {
+      indent = ind;
+      indent += "\t";
     }
 };
 
