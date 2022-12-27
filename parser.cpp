@@ -9,6 +9,7 @@
 #include <cctype>
 #include <algorithm>
 #include <assert.h>
+#include <stdio.h>
 
 const std::string begin_cmd =  "begin{itemize}";
 const std::string end_cmd =  "end{itemize}";
@@ -98,7 +99,7 @@ std::tuple<int, Item> item(std::vector<std::string> *vtr, int start_idx) {
     else if (cmd.compare(begin_cmd) == 0) { break; }
     else if (cmd.compare(end_cmd) == 0) { break; }
 
-    line = get_text(line);
+    // No need to remove \item it will only be a \t os something
     item_text += " " + line;
   }
     
@@ -135,33 +136,6 @@ std::tuple<int, Itemize> begin_itemize(std::vector<std::string> *vtr, int start_
     return std::make_tuple(cur_idx, itemizeObj);
 }
 
-//void read(std::ifstream *myfile, std::vector<std::vector<std::string>> all_itemize);
-//  std::vector<std::string> vtr = {};
-//  std::string tmp;
-//  std::string line;
-//  bool read = false;
-//
-//  while ( std::getline ((*myfile),line) )
-//  {
-//    if ( line.compare("") == 0 ) { continue; }
-//	  tmp = line;
-//    tmp.erase(tmp.begin());
-//
-//	  if ( tmp.compare(end_cmd) == 0 ) { 
-//      if ( read == )
-//      read = false; 
-//      all_itemize.push_back(vtr);
-//      vtr = {};
-//    }
-//    if ( read ) { vtr.push_back(line); }
-//    if ( tmp.compare(begin_cmd) == 0) { 
-//      if (read == false) { vtr.push_back("\\" + begin_cmd); }
-//      read = true; 
-//    }
-//  }
-//  vtr.push_back("\\" + end_cmd);
-//}
-
 void read(std::ifstream *myfile, std::vector<std::vector<std::string>> *all_itemize) {
   std::vector<std::string> vtr = {};
   std::string tmp;
@@ -178,8 +152,8 @@ void read(std::ifstream *myfile, std::vector<std::vector<std::string>> *all_item
       count--; 
       assert (count >= 0);
       if ( count == 0 ) {
-        (*all_itemize).push_back(vtr);
         vtr.push_back("\\" + end_cmd);
+        (*all_itemize).push_back(vtr);
         vtr = {};
       }
     }
@@ -193,10 +167,60 @@ void read(std::ifstream *myfile, std::vector<std::vector<std::string>> *all_item
   }
 }
 
+void get_data(std::vector<std::vector<std::string>> *all_itemize, std::vector<Itemize> *data) {
+  Itemize itemizeObj;
+  int bla;
+  for (std::vector<std::string> i : (*all_itemize)) {
+    if (i.empty()) { continue; }
+    std::tie(bla, itemizeObj) = begin_itemize(&i, 0);
+    (*data).push_back(itemizeObj);
+  }
+}
+
+void tui(std::vector<Itemize> *data) {
+  char ans;
+  char all = 'a';
+  char first = 'f';
+  char next = 'n';
+  char quit = 'q';
+
+  while (ans != all && ans != first && ans != quit) {
+    std::cout << "Show all[a]" << '\n';
+    std::cout << "Show first[f]" << '\n';
+    std::cout << "";
+    std::cin >> ans;
+  }
+
+  if (ans == all) {
+    for (Itemize i: (*data)) {
+      std::cout << "New Itemize" << '\n';
+      i.print();
+    }
+    return;
+  }
+  else if (ans == first) {
+    for (int i = 0; i < (*data).size(); i++) {
+      (*data)[i].print();
+      while (ans != next && ans != quit) {
+        std::cout << "Show next[n]" << '\n';;
+        std::cout << "Quit[q]" << '\n';;
+        std::cin >> ans;
+      }
+      if (ans == quit) {
+        return;
+      }
+    }
+  }
+  else {
+    return;
+  }
+}
 
 int main () {
   std::vector<std::vector<std::string>> all_itemize = {};
+  std::vector<Itemize> data = {};
   std::ifstream myfile ("test.tex");
+
   if (myfile.is_open())
   {
     read(&myfile, &all_itemize);
@@ -204,10 +228,8 @@ int main () {
   }
   else std::cout << "Unable to open file"; 
 
-  Itemize itemizeObj;
-  int bla;
-  std::tie(bla, itemizeObj) = begin_itemize(&all_itemize[0], 0);
-  itemizeObj.print();
+  get_data(&all_itemize, &data);
+  tui(&data);
 
   return 0;
 }
