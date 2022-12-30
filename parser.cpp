@@ -1,29 +1,43 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <string.h>
 #include <vector>
 #include <tuple>
+#include <any>
 #include <variant>
 #include <cctype>
 #include <algorithm>
 #include <assert.h>
 #include <stdio.h>
-//#include <osg/PositionAttitudeTransform>
-//if (Itemize* child_itemize = dynamic_cast<Itemize*>(i)) {  }
+#include "ans/ans.hpp"
+
+typedef std::variant<ans::Definition, ans::SingleAnswer> answer_t;
 
 const std::string begin_cmd =  "begin{itemize}";
 const std::string end_cmd =  "end{itemize}";
 const std::string item_cmd =  "item";
 
+struct ItemAnswerAskVisitor
+{
+  template <class T>
+  void operator()(T&& _in){ _in.ask(); }
+};
+
 class Item {
   private:
     std::string text;
     std::string indent;
+    answer_t answer;
 
   public:
+    Item(std::string item_text, answer_t item_answer) {
+      text = item_text;
+      answer = item_answer;
+    }
+
     Item(std::string item_text) {
       text = item_text;
+      answer = ans::Definition(item_text, "");
     }
 
     Item() {
@@ -39,6 +53,14 @@ class Item {
     void increase_indent(std::string ind) {
       indent = ind;
       indent += "\t";
+    }
+
+    void setAnswer(answer_t new_answer){
+      answer = new_answer;
+    }
+
+    answer_t getAnswer() {
+      return answer;
     }
 };
 
@@ -77,6 +99,10 @@ class Itemize {
     void increase_indent(std::string ind) {
       indent = ind;
       indent += "\t";
+    }
+
+    std::vector<std::variant<Itemize, Item>> *get_items_list() {
+      return &items_list;
     }
 };
 
@@ -124,6 +150,7 @@ std::tuple<int, Item> item(std::vector<std::string> *vtr, int start_idx) {
     item_text += " " + line;
   }
     
+  // Type
   Item itemObj(item_text);
 
   return std::make_tuple(cur_idx, itemObj);
@@ -198,16 +225,52 @@ void get_data(std::vector<std::vector<std::string>> *all_itemize, std::vector<It
   }
 }
 
+struct ShowVisitor
+{
+  template <class T>
+  void operator()(T&& _in){ _in.show(); }
+};
+
+struct askVisitor
+{
+  template <class T>
+  void operator()(T&& _in){ _in.ask(); }
+};
+
+
+
+void tui_quiz(std::vector<Itemize> *data) {
+  std::vector<std::variant<Itemize, Item>> *items_list;
+  for (Itemize i : (*data)) {
+    items_list = i.get_items_list();
+    for(std::variant<Itemize, Item> j : (*items_list)){
+      try {
+        Item item = std::get<Item>(j);
+        answer_t answer = item.getAnswer();
+        std::visit(ShowVisitor{}, answer);
+        std::visit(askVisitor{}, answer);
+        std::cout << "some success" << '\n';
+      }
+      catch (std::bad_variant_access const& ex) {
+        continue; 
+      }
+    }
+  }
+}
+
+
 void tui(std::vector<Itemize> *data) {
   char ans;
   char all = 'a';
+  char quiz = 'z';
   char first = 'f';
   char next = 'n';
   char quit = 'q';
 
-  while (ans != all && ans != first && ans != quit) {
+  while (ans != all && ans != first && ans != quit && ans != quiz) {
     std::cout << "Show all[a]" << '\n';
     std::cout << "Show first[f]" << '\n';
+    std::cout << "Start quiz[z]" << '\n';
     std::cout << "";
     std::cin >> ans;
   }
@@ -223,14 +286,17 @@ void tui(std::vector<Itemize> *data) {
     for (int i = 0; i < (*data).size(); i++) {
       (*data)[i].print();
       while (ans != next && ans != quit) {
-        std::cout << "Show next[n]" << '\n';;
-        std::cout << "Quit[q]" << '\n';;
+        std::cout << "Show next[n]" << '\n';
+        std::cout << "Quit[q]" << '\n';
         std::cin >> ans;
       }
       if (ans == quit) {
         return;
       }
     }
+  }
+  else if (ans == quiz) {
+    tui_quiz(data);
   }
   else {
     return;
