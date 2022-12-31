@@ -20,6 +20,7 @@ namespace ask
         void askForAnswer(){
             std::cout << question;
             std::cin >> user_answer;
+            showResult();
         }
 
         bool compareAnswer(){
@@ -32,6 +33,7 @@ namespace ask
             }
             return result;
         }
+
         void showResult(){
             std::cout << "Correct: " << correct_answer << ", Your answer: " << user_answer << '\n';
         }

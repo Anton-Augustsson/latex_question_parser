@@ -4,20 +4,23 @@
 
 namespace ans
 {
-    class Answer {
-    public:
-        virtual void show(){
-            std::cout << "Answer undefined" << '\n';
-        }
-        virtual void ask(){
-            std::cout << "Nothing to ask" << '\n';
-        }
-        virtual void showResult(){
-            std::cout << "Nothing to ask" << '\n';
-        }
-    };
+    //class Answer {
+    //public:
+    //    virtual void show(){
+    //        std::cout << "Answer undefined" << '\n';
+    //    }
+    //    virtual void ask(){
+    //        std::cout << "Nothing to ask" << '\n';
+    //    }
+    //    virtual void showResult(){
+    //        std::cout << "Nothing to ask" << '\n';
+    //    }
+    //    virtual bool compare(){
+    //        return false;
+    //    }
+    //};
 
-    class Definition: public Answer {
+    class Definition {
     private:
         std::string subject;
         std::string def;
@@ -35,10 +38,11 @@ namespace ans
 
         void show() { std::cout << subject << " " << def << '\n'; }
         void ask() { asker.askForAnswer(); }
+        //bool compare(){ return asker.compareAnswer(); }
         void showResult() { asker.showResult(); }
     };
 
-    class SingleAnswer: public Answer {
+    class SingleAnswer {
     private:
         std::string question;
         int answer;
@@ -47,6 +51,7 @@ namespace ans
     public:
         void show() { std::cout << answer << '\n'; }
         void ask() { asker.askForAnswer(); }
+        //bool compare(){ return asker.compareAnswer(); }
         void showResult() { asker.showResult(); }
     };
 }

@@ -85,7 +85,6 @@ class Itemize {
 
   public:
     void print() {
-      Itemize child_itemize;
       for(auto& i : items_list) {
         std::visit(IncreaseIndentVisitor{indent}, i);
         std::visit(PrintVisitor{}, i);
@@ -231,30 +230,61 @@ struct ShowVisitor
   void operator()(T&& _in){ _in.show(); }
 };
 
-struct askVisitor
+struct AskVisitor
 {
   template <class T>
   void operator()(T&& _in){ _in.ask(); }
 };
 
+struct ShowResultVisitor 
+{ 
+  template <class T>
+  void operator()(T&& _in){ _in.showResult(); }
+};
 
+struct CompareVisitor 
+{ 
+  template <class T>
+  bool operator()(T&& _in){ return _in.compare(); }
+};
+
+void tui_ask(std::vector<std::variant<Itemize, Item>> *items_list){
+  for(std::variant<Itemize, Item> j : (*items_list)){
+    try {
+      Item item = std::get<Item>(j);
+      answer_t answer = item.getAnswer();
+      std::visit(ShowVisitor{}, answer);
+      std::visit(AskVisitor{}, answer);
+    }
+    catch (std::bad_variant_access const& ex) {
+      continue; 
+    }
+  }
+}
+
+void tui_result(std::vector<std::variant<Itemize, Item>> *items_list){
+  int score = 0;
+  bool comp_res;
+  for(std::variant<Itemize, Item> j : (*items_list)){
+    try {
+      Item item = std::get<Item>(j);
+      answer_t answer = item.getAnswer();
+      std::visit(ShowResultVisitor{}, answer);
+      //comp_res = std::visit(CompareVisitor{}, answer);
+      //if (comp_res == true) { score++; }
+    }
+    catch (std::bad_variant_access const& ex) {
+      continue; 
+    }
+  }
+}
 
 void tui_quiz(std::vector<Itemize> *data) {
   std::vector<std::variant<Itemize, Item>> *items_list;
   for (Itemize i : (*data)) {
     items_list = i.get_items_list();
-    for(std::variant<Itemize, Item> j : (*items_list)){
-      try {
-        Item item = std::get<Item>(j);
-        answer_t answer = item.getAnswer();
-        std::visit(ShowVisitor{}, answer);
-        std::visit(askVisitor{}, answer);
-        std::cout << "some success" << '\n';
-      }
-      catch (std::bad_variant_access const& ex) {
-        continue; 
-      }
-    }
+    tui_ask(items_list);
+    tui_result(items_list);
   }
 }
 
