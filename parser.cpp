@@ -37,7 +37,7 @@ class Item {
 
     Item(std::string item_text) {
       text = item_text;
-      answer = ans::Definition(item_text, "");
+      answer = ans::Definition(item_text, "def");
     }
 
     Item() {
@@ -102,6 +102,23 @@ class Itemize {
 
     std::vector<std::variant<Itemize, Item>> *get_items_list() {
       return &items_list;
+    }
+
+    void set_items_list(std::vector<std::variant<Itemize, Item>> itemize_items_list) {
+      items_list = itemize_items_list;
+    }
+
+    std::variant<Itemize, Item> get_item(int idx) {
+      return items_list[idx];
+    }
+
+    void set_item(int idx, std::variant<Itemize, Item> item) {
+      // Warning this offers no protection you need to know the proper idx
+      items_list[idx] = item;
+    }
+
+    int get_size() {
+      return items_list.size();
     }
 };
 
@@ -220,7 +237,7 @@ void get_data(std::vector<std::vector<std::string>> *all_itemize, std::vector<It
   for (std::vector<std::string> i : (*all_itemize)) {
     if (i.empty()) { continue; }
     std::tie(bla, itemizeObj) = begin_itemize(&i, 0);
-    (*data).push_back(itemizeObj);
+    data->push_back(itemizeObj);
   }
 }
 
@@ -248,13 +265,15 @@ struct CompareVisitor
   bool operator()(T&& _in){ return _in.compare(); }
 };
 
-void tui_ask(std::vector<std::variant<Itemize, Item>> *items_list){
-  for(std::variant<Itemize, Item> j : (*items_list)){
+void tui_ask(Itemize *itemize_obj){
+  for (int i = 0; i < itemize_obj->get_size(); i++)
+  {
     try {
-      Item item = std::get<Item>(j);
+      Item item = std::get<Item>(itemize_obj->get_item(i));
       answer_t answer = item.getAnswer();
-      std::visit(ShowVisitor{}, answer);
       std::visit(AskVisitor{}, answer);
+      item.setAnswer(answer);
+      itemize_obj->set_item(i, item);
     }
     catch (std::bad_variant_access const& ex) {
       continue; 
@@ -262,7 +281,9 @@ void tui_ask(std::vector<std::variant<Itemize, Item>> *items_list){
   }
 }
 
-void tui_result(std::vector<std::variant<Itemize, Item>> *items_list){
+void tui_result(Itemize *itemize_obj){
+  std::vector<std::variant<Itemize, Item>> *items_list;
+  items_list = itemize_obj->get_items_list();
   int score = 0;
   bool comp_res;
   for(std::variant<Itemize, Item> j : (*items_list)){
@@ -277,14 +298,13 @@ void tui_result(std::vector<std::variant<Itemize, Item>> *items_list){
       continue; 
     }
   }
+  //itemize_obj->set_items_list(*items_list);
 }
 
 void tui_quiz(std::vector<Itemize> *data) {
-  std::vector<std::variant<Itemize, Item>> *items_list;
   for (Itemize i : (*data)) {
-    items_list = i.get_items_list();
-    tui_ask(items_list);
-    tui_result(items_list);
+    tui_ask(&i);
+    tui_result(&i);
   }
 }
 

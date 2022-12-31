@@ -30,7 +30,7 @@ namespace ans
         Definition(std::string definition_subject, std::string definition_def) {
             subject = definition_subject;
             def = definition_def;
-            asker = ask::Asker<std::string>(subject, def);
+            asker = ask::Asker<std::string>(def, (subject + ": "));
         }
         Definition() {
             asker = ask::Asker<std::string>("undefined");

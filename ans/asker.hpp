@@ -20,7 +20,6 @@ namespace ask
         void askForAnswer(){
             std::cout << question;
             std::cin >> user_answer;
-            showResult();
         }
 
         bool compareAnswer(){
