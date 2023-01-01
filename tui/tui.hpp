@@ -50,14 +50,14 @@ void tui_result(Itemize *itemize_obj){
       Item item = std::get<Item>(j);
       answer_t answer = item.getAnswer();
       std::visit(ShowResultVisitor{}, answer);
-      //comp_res = std::visit(CompareVisitor{}, answer);
-      //if (comp_res == true) { score++; }
+      comp_res = std::visit(CompareVisitor{}, answer);
+      if (comp_res == true) { score++; }
     }
     catch (std::bad_variant_access const& ex) {
       continue; 
     }
   }
-  //itemize_obj->set_items_list(*items_list);
+  std::cout << "Your score: " << score << std::endl;
 }
 
 void tui_quiz(std::vector<Itemize> *data) {

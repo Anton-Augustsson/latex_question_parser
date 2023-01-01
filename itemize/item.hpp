@@ -19,7 +19,7 @@ class Item {
 
     Item(std::string item_text) {
       text = item_text;
-      answer = ans::Definition(item_text, "def");
+      answer = ans::SingleAnswer(item_text, "def");
     }
 
     Item() {
