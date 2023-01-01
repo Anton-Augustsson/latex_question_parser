@@ -1,7 +1,7 @@
 all: compile run
 
 compile:
-	g++ -g parser.cpp
+	g++ -g main.cpp
 
 run:
 	./a.out

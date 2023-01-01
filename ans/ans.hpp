@@ -1,25 +1,13 @@
+// ans.hpp
+#ifndef ANS_HPP_
+#define ANS_HPP_
+
 #include <string>
 #include <iostream>
 #include "asker.hpp"
 
 namespace ans
 {
-    //class Answer {
-    //public:
-    //    virtual void show(){
-    //        std::cout << "Answer undefined" << '\n';
-    //    }
-    //    virtual void ask(){
-    //        std::cout << "Nothing to ask" << '\n';
-    //    }
-    //    virtual void showResult(){
-    //        std::cout << "Nothing to ask" << '\n';
-    //    }
-    //    virtual bool compare(){
-    //        return false;
-    //    }
-    //};
-
     class Definition {
     private:
         std::string subject;
@@ -55,3 +43,5 @@ namespace ans
         void showResult() { asker.showResult(); }
     };
 }
+
+#endif
