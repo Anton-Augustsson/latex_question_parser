@@ -1,4 +1,4 @@
-all: compile run
+all: clean compile run
 
 compile:
 	g++ -g main.cpp
