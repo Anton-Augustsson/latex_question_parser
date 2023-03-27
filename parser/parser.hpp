@@ -52,7 +52,17 @@ std::tuple<int, Item>  parse_definition(std::vector<std::string> *vtr, int start
   line = get_text(line);
   item_text += line;
 
+  int separator_idx = line.find(":");
+  std::string subject;
+  std::string definition;
+  
   for (cur_idx = start_idx+1; cur_idx < (*vtr).size(); cur_idx++) {
+    
+    if (separator_idx < line.length()) {
+      subject = line.substr(0, separator_idx);
+      definition = line.substr(separator_idx, line.length());
+    }
+
     line = (*vtr)[cur_idx];
     cmd = get_command(line);
 
@@ -66,8 +76,9 @@ std::tuple<int, Item>  parse_definition(std::vector<std::string> *vtr, int start
     item_text += " " + line;
   }
     
-  // Type
-  Item itemObj(item_text);
+  // Create the item object
+  ans::Definition def = ans::Definition(subject, definition);
+  Item itemObj(item_text, def);
 
   return std::make_tuple(cur_idx, itemObj);
 }
@@ -102,18 +113,17 @@ std::tuple<int, Item>  parse_no_answer(std::vector<std::string> *vtr, int start_
   return std::make_tuple(cur_idx, itemObj);
 }
 std::tuple<int, Item>  add_items(std::vector<std::string> *vtr, int start_idx) {
-  //int cur_idx;  // current index
-  //Item itemObj;  // a item object in itemize
+  int cur_idx;  // current index
+  Item itemObj;  // a item object in itemize
 
-  //if (constants::single_answer_pragma == (*vtr)[cur_idx-1]) {
-  //  std::tie(cur_idx, itemObj) = parse_definition(vtr, start_idx);
-  //}
-  //else {
-  //  std::tie(cur_idx, itemObj) = parse_no_answer(vtr, start_idx);
-  //}
-  //  
-  //return std::make_tuple(cur_idx, itemObj);
-  return parse_no_answer(vtr, start_idx);
+  if (start_idx > 0 && constants::definition_pragma.compare(get_command((*vtr)[start_idx-1])) == 0) {
+    std::tie(cur_idx, itemObj) = parse_definition(vtr, start_idx);
+  }
+  else {
+    std::tie(cur_idx, itemObj) = parse_no_answer(vtr, start_idx);
+  }
+    
+  return std::make_tuple(cur_idx, itemObj);
 }
 
 
@@ -130,7 +140,7 @@ std::tuple<int, Itemize>  add_itemizes(std::vector<std::string> *vtr, int start_
       // Add the new item object in itemize object
       if ( cmd.compare(constants::item_cmd) == 0 ) {
         std::tie(cur_idx, itemObj) =  add_items(vtr, cur_idx);
-        cur_idx--;
+        cur_idx--; // TODO: I need it but I dont know why 
         itemizeObj.add(itemObj);
       }
       // Add the new itemize object in current itemize object
