@@ -156,6 +156,53 @@ std::tuple<int, Itemize>  add_itemizes(std::vector<std::string> *vtr, int start_
 }
 
 
+void read_text(std::string text, std::vector<std::vector<std::string>> *all_itemize) {
+  std::vector<std::string> vtr = {};
+  std::string tmp;
+  std::string line;
+  int count = 0;
+
+  int separator = text.find("\n");
+
+  while ( separator < text.length() )
+  {
+    line = text.substr(0, separator);
+    text = text.substr(separator, text.length());
+    separator = text.find("\n");
+
+    // skip if there is an empty line
+    if ( line.compare("") == 0 ) { continue; }
+
+    // Get the command of the line
+	  tmp = line;
+    tmp.erase(tmp.begin());
+
+	  if ( tmp.compare(constants::end_cmd) == 0 ) { 
+      count--; 
+      assert (count >= 0);
+
+      // Add \end{itemize} when the root itemize has ended
+      if ( count == 0 ) {
+        vtr.push_back("\\" + constants::end_cmd);
+        (*all_itemize).push_back(vtr);
+        vtr = {};
+      }
+    }
+
+    if ( count > 0 ) { vtr.push_back(line); }
+
+    if ( tmp.compare(constants::begin_cmd) == 0 ) { 
+      // New root \begin{itemize}
+      if ( count == 0 ) {
+        vtr.push_back("\\" + constants::begin_cmd);
+      }
+
+      count++;
+    }
+  }
+}
+
+
 /*
   Get all lines within a root itemize object. 
 

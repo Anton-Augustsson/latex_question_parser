@@ -4,7 +4,7 @@ compile:
 	g++ -g main.cpp
 
 run:
-	./a.out
+	./a.out f test.tex
 
 clean:
 	$(RM) a.out
