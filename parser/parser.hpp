@@ -164,10 +164,11 @@ void read_text(std::string text, std::vector<std::vector<std::string>> *all_item
 
   int separator = text.find("\n");
 
+  // FIXME: it should be possible to not have \n at the end of text
   while ( separator < text.length() )
   {
     line = text.substr(0, separator);
-    text = text.substr(separator, text.length());
+    text = text.substr(separator+1, text.length()); // +1 to remove \n
     separator = text.find("\n");
 
     // skip if there is an empty line
@@ -189,6 +190,7 @@ void read_text(std::string text, std::vector<std::vector<std::string>> *all_item
       }
     }
 
+    // Add line in the the vector that will be added for all itemize
     if ( count > 0 ) { vtr.push_back(line); }
 
     if ( tmp.compare(constants::begin_cmd) == 0 ) { 
