@@ -1,4 +1,6 @@
-all: clean compile_tests run_tests clean compile run
+all: clean compile run
+
+test: clean compile_tests run_tests
 
 compile:
 	g++ -g main.cpp -o main
@@ -11,6 +13,9 @@ run:
 
 run_tests:
 	./tests
+
+debug: compile
+	gdb --args main f unit_tests/test_file.tex
 
 clean:
 	$(RM) a.out

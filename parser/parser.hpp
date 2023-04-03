@@ -52,6 +52,7 @@ std::tuple<int, Item>  parse_definition(std::vector<std::string> *vtr, int start
   line = get_text(line);
   item_text += line;
 
+  // FIXME: remove : and space before the definition start
   int separator_idx = line.find(":");
   std::string subject;
   std::string definition;
@@ -156,11 +157,47 @@ std::tuple<int, Itemize>  add_itemizes(std::vector<std::string> *vtr, int start_
 }
 
 
-void read_text(std::string text, std::vector<std::vector<std::string>> *all_itemize) {
-  std::vector<std::string> vtr = {};
+std::vector<std::string> add_line(std::string line) {
   std::string tmp;
+  std::vector<std::string> vtr_to_add = {}; // Will be added to all_itemize
+  static std::vector<std::string> vtr;
+  static int count = 0;
+
+  // Get the command of the line
+	tmp = line;
+  tmp.erase(tmp.begin());
+
+	if ( tmp.compare(constants::end_cmd) == 0 ) { 
+    count--; 
+    assert (count >= 0);
+
+    // Add \end{itemize} when the root itemize has ended
+    if ( count == 0 ) {
+      vtr.push_back("\\" + constants::end_cmd);
+      vtr_to_add = vtr;
+      //(*all_itemize).push_back(vtr);
+      vtr = {};
+    }
+  }
+  
+  if ( count > 0 ) { vtr.push_back(line); }
+  
+  if ( tmp.compare(constants::begin_cmd) == 0 ) { 
+    // New root \begin{itemize}
+    if ( count == 0 ) {
+      vtr.push_back("\\" + constants::begin_cmd);
+    }
+
+    count++;
+  }
+
+  return vtr_to_add;
+}
+
+
+void read_text(std::string text, std::vector<std::vector<std::string>> *all_itemize) {
   std::string line;
-  int count = 0;
+  std::vector<std::string> vtr_to_add;
 
   int separator = text.find("\n");
 
@@ -174,32 +211,9 @@ void read_text(std::string text, std::vector<std::vector<std::string>> *all_item
     // skip if there is an empty line
     if ( line.compare("") == 0 ) { continue; }
 
-    // Get the command of the line
-	  tmp = line;
-    tmp.erase(tmp.begin());
-
-	  if ( tmp.compare(constants::end_cmd) == 0 ) { 
-      count--; 
-      assert (count >= 0);
-
-      // Add \end{itemize} when the root itemize has ended
-      if ( count == 0 ) {
-        vtr.push_back("\\" + constants::end_cmd);
-        (*all_itemize).push_back(vtr);
-        vtr = {};
-      }
-    }
-
-    // Add line in the the vector that will be added for all itemize
-    if ( count > 0 ) { vtr.push_back(line); }
-
-    if ( tmp.compare(constants::begin_cmd) == 0 ) { 
-      // New root \begin{itemize}
-      if ( count == 0 ) {
-        vtr.push_back("\\" + constants::begin_cmd);
-      }
-
-      count++;
+    vtr_to_add = add_line(line);
+    if ( vtr_to_add.size() > 0 ) {
+      (*all_itemize).push_back(vtr_to_add);
     }
   }
 }
@@ -225,41 +239,17 @@ void read_text(std::string text, std::vector<std::vector<std::string>> *all_item
   The second element will have just one element in it, i.e. \item blabla2
 */
 void read(std::ifstream *myfile, std::vector<std::vector<std::string>> *all_itemize) {
-  std::vector<std::string> vtr = {};
-  std::string tmp;
   std::string line;
-  int count = 0;
+  std::vector<std::string> vtr_to_add;
 
   while ( std::getline ((*myfile),line) )
   {
     // skip if there is an empty line
     if ( line.compare("") == 0 ) { continue; }
 
-    // Get the command of the line
-	  tmp = line;
-    tmp.erase(tmp.begin());
-
-	  if ( tmp.compare(constants::end_cmd) == 0 ) { 
-      count--; 
-      assert (count >= 0);
-
-      // Add \end{itemize} when the root itemize has ended
-      if ( count == 0 ) {
-        vtr.push_back("\\" + constants::end_cmd);
-        (*all_itemize).push_back(vtr);
-        vtr = {};
-      }
-    }
-
-    if ( count > 0 ) { vtr.push_back(line); }
-
-    if ( tmp.compare(constants::begin_cmd) == 0 ) { 
-      // New root \begin{itemize}
-      if ( count == 0 ) {
-        vtr.push_back("\\" + constants::begin_cmd);
-      }
-
-      count++;
+    vtr_to_add = add_line(line);
+    if ( vtr_to_add.size() > 0 ) {
+      (*all_itemize).push_back(vtr_to_add);
     }
   }
 }
