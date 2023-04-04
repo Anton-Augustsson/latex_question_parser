@@ -1,12 +1,10 @@
-// constants.hpp
-#ifndef CONSTANTS_HPP_
-#define CONSTANTS_HPP_
+#pragma once
 
 #include <variant>
 #include "../ans/ans.hpp"
 
 
-namespace constants
+namespace constant
 {
   // Itemize
   const std::string begin_cmd =  "begin{itemize}";
@@ -16,11 +14,9 @@ namespace constants
   const std::string item_cmd =  "item";
 
   // ans
-  const std::string multiple_choice_pragma = "pragma ans MultipleChoice ";
-  const std::string definition_pragma = "pragma ans Definition";
-  const std::string single_answer_pragma = "pragma ans SingleAnswer "; 
+  const std::string multi_pragma = "pragma ans MultipleChoice ";
+  const std::string def_pragma = "pragma ans Definition";
+  const std::string single_pragma = "pragma ans SingleAnswer "; 
 }
 
 typedef std::variant<ans::Definition, ans::SingleAnswer> answer_t;
-
-#endif

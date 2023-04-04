@@ -1,6 +1,4 @@
-// itemize.hpp
-#ifndef ITEMIZE_HPP_
-#define ITEMIZE_HPP_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -71,5 +69,3 @@ class Itemize {
       return items_list.size();
     }
 };
-
-#endif

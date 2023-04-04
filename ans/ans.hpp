@@ -1,6 +1,4 @@
-// ans.hpp
-#ifndef ANS_HPP_
-#define ANS_HPP_
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -131,5 +129,3 @@ namespace ans
         void showResult() { asker.showResult(); }
     };
 }
-
-#endif

@@ -1,6 +1,4 @@
-// item.hpp
-#ifndef ITEM_HPP_
-#define ITEM_HPP_
+#pragma once
 
 #include <string>
 #include "../constants/constants.hpp"
@@ -45,5 +43,3 @@ class Item {
       return answer;
     }
 };
-
-#endif

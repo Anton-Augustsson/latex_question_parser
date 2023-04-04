@@ -26,10 +26,12 @@
 	              \item dfasfew: 9
              \end{itemize}"
 */
-int main(int argc, char *argv[]) {
-
-  if (argc != 3) {
-    std::cout << "Usage: $ a.out f file.tex"; 
+int main(int argc, char *argv[]) 
+{
+  if ( !(argc == 3 || argc == 4) )
+  {
+    std::cout << "Usage normal: $ a.out f file.tex"; 
+    std::cout << "Usage silent: $ a.out f file.tex s"; 
     return -1;
   }
 
@@ -54,7 +56,11 @@ int main(int argc, char *argv[]) {
   }
 
   get_data(&all_itemize, &data);
-  tui(&data);
+
+  if ( !(argc == 4 && strcmp(argv[3], "s") == 0) )
+  {
+    tui(&data);
+  }
 
   return 0;
 }

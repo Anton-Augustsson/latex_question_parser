@@ -1,12 +1,18 @@
+#pragma once
+
 #include <type_traits>
+#include <string>
+
 
 template<typename T>
-bool compare_answer(T correct, T user){
+bool compare_answer(T correct, T user)
+{
     return correct == user;
 }
 
 template<>
-bool compare_answer<std::string>(std::string correct, std::string user){
+bool compare_answer<std::string>(std::string correct, std::string user)
+{
     return correct.compare(user) == 0;
 }
 

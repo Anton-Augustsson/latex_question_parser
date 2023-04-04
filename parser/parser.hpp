@@ -1,3 +1,5 @@
+#pragma once
+
 #include <tuple>
 #include <string>
 #include <vector>
@@ -12,14 +14,17 @@
 /* 
   Get the command, e.g. \item
 */
-std::string get_command(std::string i) {
+std::string get_command(std::string i) 
+{
     std::string tmp = i;
     tmp.erase(std::remove_if(tmp.begin(), tmp.end(), ::isspace), tmp.end());
 
-    if (tmp == "%pragmaansDefinition") {
+    if (tmp == "%pragmaansDefinition") 
+    {
       return "pragma ans Definition";
     }
-    else {
+    else 
+    {
       tmp = i.substr(0, i.find(" "));  // Get the first word in sentence
       tmp.erase(std::remove_if(tmp.begin(), tmp.end(), ::isspace), tmp.end());  // Remove all whitespace
       tmp.erase(tmp.begin());  // Remove first char "\"
@@ -31,10 +36,11 @@ std::string get_command(std::string i) {
 /*
   Get the text after the command 
 */
-std::string get_text(std::string line) {
+std::string get_text(std::string line) 
+{
   size_t position;  // position of the command in string
 
-  position = line.find(constants::item_cmd);  // Find when whitespace ends
+  position = line.find(constant::item_cmd);  // Find when whitespace ends
   line = line.substr(position);  // Remove whitespace before \item
   line.erase(0, 5);  // Remove item string
 
@@ -42,24 +48,25 @@ std::string get_text(std::string line) {
 }
 
 
-std::tuple<int, Item>  parse_definition(std::vector<std::string> *vtr, int start_idx) {
-  int cur_idx;  // current index
+std::tuple<int, Item>  parse_definition(std::vector<std::string> *vtr, int start_idx) 
+{
+  std::string definition;  // for the answer
+  std::string subject;  // for the answer
   std::string item_text;  // text of the itemObj
   std::string line;  // text of the line
   std::string cmd;  // command of the line
-
-  line = (*vtr)[start_idx];
-  line = get_text(line);
-  item_text += line;
+  int separator_idx;  // the index where : apper
+  int cur_idx;
 
   // FIXME: remove : and space before the definition start
-  int separator_idx = line.find(":");
-  std::string subject;
-  std::string definition;
+  line = get_text((*vtr)[start_idx]);
+  item_text += line;
+  separator_idx = line.find(":");
   
-  for (cur_idx = start_idx+1; cur_idx < (*vtr).size(); cur_idx++) {
-    
-    if (separator_idx < line.length()) {
+  for (cur_idx = start_idx+1; cur_idx < (*vtr).size(); cur_idx++) 
+  {
+    if (separator_idx < line.length()) 
+    {
       subject = line.substr(0, separator_idx);
       definition = line.substr(separator_idx, line.length());
     }
@@ -69,9 +76,9 @@ std::tuple<int, Item>  parse_definition(std::vector<std::string> *vtr, int start
 
     // Add text until command is found 
     // FIXME: this is line sensetive \item should be able to be identify on the same line
-    if (cmd.compare(constants::item_cmd) == 0) { break; }
-    else if (cmd.compare(constants::begin_cmd) == 0) { break; }
-    else if (cmd.compare(constants::end_cmd) == 0) { break; }
+    if (cmd.compare(constant::item_cmd) == 0) { break; }
+    else if (cmd.compare(constant::begin_cmd) == 0) { break; }
+    else if (cmd.compare(constant::end_cmd) == 0) { break; }
 
     // No need to remove \item it will only be a \t os something
     item_text += " " + line;
@@ -84,43 +91,52 @@ std::tuple<int, Item>  parse_definition(std::vector<std::string> *vtr, int start
   return std::make_tuple(cur_idx, itemObj);
 }
 
-std::tuple<int, Item>  parse_no_answer(std::vector<std::string> *vtr, int start_idx) {
-  int cur_idx;  // current index
+
+std::tuple<int, Item>  parse_no_answer(std::vector<std::string> *vtr, int start_idx) 
+{
   std::string item_text;  // text of the itemObj
   std::string line;  // text of the line
   std::string cmd;  // command of the line
+  int cur_idx;  // current index
 
   line = (*vtr)[start_idx];
   line = get_text(line);
   item_text += line;
 
-  for (cur_idx = start_idx+1; cur_idx < (*vtr).size(); cur_idx++) {
+  for (cur_idx = start_idx+1; cur_idx < (*vtr).size(); cur_idx++) 
+  {
     line = (*vtr)[cur_idx];
     cmd = get_command(line);
 
     // Add text until command is found 
     // FIXME: this is line sensetive \item should be able to be identify on the same line
-    if (cmd.compare(constants::item_cmd) == 0) { break; }
-    else if (cmd.compare(constants::begin_cmd) == 0) { break; }
-    else if (cmd.compare(constants::end_cmd) == 0) { break; }
+    if (cmd.compare(constant::item_cmd) == 0) { break; }
+    else if (cmd.compare(constant::begin_cmd) == 0) { break; }
+    else if (cmd.compare(constant::end_cmd) == 0) { break; }
 
     // No need to remove \item it will only be a \t os something
     item_text += " " + line;
   }
     
-  // Type
+  // Create item object
   Item itemObj(item_text);
 
   return std::make_tuple(cur_idx, itemObj);
 }
-std::tuple<int, Item>  add_items(std::vector<std::string> *vtr, int start_idx) {
-  int cur_idx;  // current index
-  Item itemObj;  // a item object in itemize
 
-  if (start_idx > 0 && constants::definition_pragma.compare(get_command((*vtr)[start_idx-1])) == 0) {
+
+std::tuple<int, Item>  add_items(std::vector<std::string> *vtr, int start_idx) 
+{
+  int has_pragma = constant::def_pragma.compare(get_command((*vtr)[start_idx-1]));
+  Item itemObj;  // a item object in itemize
+  int cur_idx;  // current index
+
+  if (start_idx > 0 && has_pragma == 0) 
+  {
     std::tie(cur_idx, itemObj) = parse_definition(vtr, start_idx);
   }
-  else {
+  else 
+  {
     std::tie(cur_idx, itemObj) = parse_no_answer(vtr, start_idx);
   }
     
@@ -128,36 +144,43 @@ std::tuple<int, Item>  add_items(std::vector<std::string> *vtr, int start_idx) {
 }
 
 
-std::tuple<int, Itemize>  add_itemizes(std::vector<std::string> *vtr, int start_idx) {
+std::tuple<int, Itemize>  add_itemizes(std::vector<std::string> *vtr, int start_idx) 
+{
     Itemize itemizeObj;  // New itemize object
     Itemize subItemizeObj;  // if there is itemize within the current
     Item itemObj;  // a item object in itemize
     std::string cmd;  // Command of the line
     int cur_idx; // current index
 
-    for (cur_idx = start_idx+1; cur_idx < (*vtr).size(); cur_idx++) {
+    for (cur_idx = start_idx+1; cur_idx < (*vtr).size(); cur_idx++) 
+    {
       cmd = get_command((*vtr)[cur_idx]);
       
       // Add the new item object in itemize object
-      if ( cmd.compare(constants::item_cmd) == 0 ) {
+      if ( cmd.compare(constant::item_cmd) == 0 ) 
+      {
         std::tie(cur_idx, itemObj) =  add_items(vtr, cur_idx);
         cur_idx--; // TODO: I need it but I dont know why 
         itemizeObj.add(itemObj);
       }
       // Add the new itemize object in current itemize object
-      else if ( cmd.compare(constants::begin_cmd) == 0 ) {
+      else if ( cmd.compare(constant::begin_cmd) == 0 ) 
+      {
         std::tie(cur_idx, subItemizeObj) =  add_itemizes(vtr, cur_idx);
         itemizeObj.add(subItemizeObj);
       }
-      else if ( cmd.compare(constants::end_cmd) == 0 ) {
+      else if ( cmd.compare(constant::end_cmd) == 0 ) 
+      {
         return std::make_tuple(cur_idx, itemizeObj);
       }
     }
+
     return std::make_tuple(cur_idx, itemizeObj);
 }
 
 
-std::vector<std::string> add_line(std::string line) {
+std::vector<std::string> add_line(std::string line) 
+{
   std::string tmp;
   std::vector<std::string> vtr_to_add = {}; // Will be added to all_itemize
   static std::vector<std::string> vtr;
@@ -167,27 +190,25 @@ std::vector<std::string> add_line(std::string line) {
 	tmp = line;
   tmp.erase(tmp.begin());
 
-	if ( tmp.compare(constants::end_cmd) == 0 ) { 
+	if ( tmp.compare(constant::end_cmd) == 0 ) { 
     count--; 
     assert (count >= 0);
 
     // Add \end{itemize} when the root itemize has ended
     if ( count == 0 ) {
-      vtr.push_back("\\" + constants::end_cmd);
+      vtr.push_back("\\" + constant::end_cmd);
       vtr_to_add = vtr;
-      //(*all_itemize).push_back(vtr);
       vtr = {};
     }
   }
   
   if ( count > 0 ) { vtr.push_back(line); }
   
-  if ( tmp.compare(constants::begin_cmd) == 0 ) { 
+  if ( tmp.compare(constant::begin_cmd) == 0 ) { 
     // New root \begin{itemize}
     if ( count == 0 ) {
-      vtr.push_back("\\" + constants::begin_cmd);
+      vtr.push_back("\\" + constant::begin_cmd);
     }
-
     count++;
   }
 
@@ -221,22 +242,6 @@ void read_text(std::string text, std::vector<std::vector<std::string>> *all_item
 
 /*
   Get all lines within a root itemize object. 
-
-  Example:
-  \begin{itemize}
-    \item blabla
-    \begin{itemize}
-      \item blabla
-    \end{itemize}
-    \item blabla
-  \end{itemize}
-
-  \begin{itemize}
-    \item blabla2
-  \end{itemize}
-
-  This will give two elements in all_itemize.
-  The second element will have just one element in it, i.e. \item blabla2
 */
 void read(std::ifstream *myfile, std::vector<std::vector<std::string>> *all_itemize) {
   std::string line;
@@ -248,7 +253,8 @@ void read(std::ifstream *myfile, std::vector<std::vector<std::string>> *all_item
     if ( line.compare("") == 0 ) { continue; }
 
     vtr_to_add = add_line(line);
-    if ( vtr_to_add.size() > 0 ) {
+    if ( vtr_to_add.size() > 0 ) 
+    {
       (*all_itemize).push_back(vtr_to_add);
     }
   }
@@ -263,9 +269,10 @@ void get_data(std::vector<std::vector<std::string>> *all_itemize, std::vector<It
   Itemize itemizeObj;
   int ignore_idx;
 
-  for (std::vector<std::string> i : (*all_itemize)) {
+  for (std::vector<std::string> i : (*all_itemize)) 
+  {
     // If there is an empty element skip it
-    if (i.empty()) { continue; }
+    if ( i.empty() ) { continue; }
     // create the itemize object 
 
     std::tie(ignore_idx, itemizeObj) =  add_itemizes(&i, 0);

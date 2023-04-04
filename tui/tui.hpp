@@ -1,4 +1,7 @@
+#pragma once
+
 #include "../itemize/itemize.hpp"
+
 
 struct ShowVisitor
 {
