@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 #include "asker.hpp"
+#include "../constants/macros.hpp"
+
 
 /*
     An item can have a answer, which can be of different classes.
@@ -85,11 +87,17 @@ namespace ans
             def = definition_def;
             asker = Asker<std::string>(def, (subject + ": "));
         }
-        Definition() {
-            asker = Asker<std::string>("undefined");
+        Definition() 
+        {
+            subject = undefine_str;
         }
 
-        void show() { std::cout << subject << " " << def << '\n'; }
+        void show() { 
+            if (subject.compare(undefine_str) == 0)
+                return;
+
+            std::cout << subject << " " << def << '\n'; 
+        }
         void ask() { asker.askForAnswer(); }
         bool compare(){ return asker.compareAnswer(); }
         void showResult() { asker.showResult(); }
@@ -119,11 +127,16 @@ namespace ans
             answer = single_answer_answer;
             asker = Asker<std::string>(answer, question);
         }
-        SingleAnswer() {
-            asker = Asker<std::string>("undefined");
+        SingleAnswer() 
+        {
+            question = undefine_str;
         }
 
-        void show() { std::cout << answer << '\n'; }
+        void show() { 
+            if (question.compare(undefine_str) == 0)
+                return;
+            std::cout << answer << '\n'; 
+        }
         void ask() { asker.askForAnswer(); }
         bool compare(){ return asker.compareAnswer(); }
         void showResult() { asker.showResult(); }

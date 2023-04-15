@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <string>
+#include "../constants/macros.hpp"
 
 
 template<typename T>
@@ -30,17 +31,30 @@ public:
     Asker(T asker_correct_answer) : correct_answer(asker_correct_answer) {
         question = "Your answer: ";
     }
-    Asker() {}
+    Asker() {
+        question = undefine_str;
+
+    }
+
     void askForAnswer(){
+        if (question.compare(undefine_str) == 0)
+            return;
+
         std::cout << question;
         std::cin >> user_answer;
     }
     bool compareAnswer(){
+        if (question.compare(undefine_str) == 0)
+            false;
+
         bool result = compare_answer<T>(correct_answer, user_answer);
         return result;
     }
 
     void showResult(){
+        if (question.compare(undefine_str) == 0)
+            return;
+
         std::cout << "Correct: " << correct_answer << ", Your answer: " << user_answer << '\n';
     }
 };

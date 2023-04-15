@@ -17,6 +17,7 @@ namespace constant
   const std::string multi_pragma = "pragma ans MultipleChoice ";
   const std::string def_pragma = "pragma ans Definition";
   const std::string single_pragma = "pragma ans SingleAnswer "; 
+  const std::string undefined_str = "undefined";
 }
 
 typedef std::variant<ans::Definition, ans::SingleAnswer> answer_t;
