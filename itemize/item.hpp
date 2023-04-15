@@ -39,6 +39,15 @@ class Item {
       answer = new_answer;
     }
 
+    std::string get_text()
+    {
+      return text;
+    }
+
+    int compare(Item *itemObj) {
+      return text.compare((*itemObj).get_text());
+    }
+
     answer_t getAnswer() {
       return answer;
     }

@@ -1,9 +1,15 @@
+#include "../constants/constants.hpp"
+#include "../itemize/itemize.hpp"
+#include "../itemize/item.hpp"
 #include "../parser/parser.hpp"
+
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <tuple>
 
-bool all_itemizes_are_equal(std::vector<std::vector<std::string>> all_itemize, std::vector<std::vector<std::string>> correct_all_itemize) {
+bool all_itemizes_are_equal(std::vector<std::vector<std::string>> all_itemize, std::vector<std::vector<std::string>> correct_all_itemize) 
+{
 	if (all_itemize.size() != correct_all_itemize.size()) {
 		return false;
 	}
@@ -24,7 +30,8 @@ bool all_itemizes_are_equal(std::vector<std::vector<std::string>> all_itemize, s
 	return true;
 }
 
-int unit_test_all_itemizes_are_equal() {
+int unit_test_all_itemizes_are_equal() 
+{
 	std::vector<std::vector<std::string>> all_itemize1 = {{"\\begin{itemize}", "\\item bdsfasdf 7", "asdfdsf 8", 
     "%%pragma ans Definition", "\\item dfafew: 9", "\\end{itemize}"}};
 	std::vector<std::vector<std::string>> all_itemize2 = {{"\\begin{itemize}", "\\item bdsfasdf 7", "asdfdsf 8", 
@@ -41,7 +48,8 @@ int unit_test_all_itemizes_are_equal() {
 
 }
 
-int unit_test_foo() {
+int unit_test_read_text() 
+{
     std::vector<std::vector<std::string>> all_itemize = {};
     std::vector<std::vector<std::string>> correct_all_itemize = {{"\\begin{itemize}", "\\item bdsfasdf 7", "asdfdsf 8", 
     "%%pragma ans Definition", "\\item dfasfew: 9", "\\end{itemize}"}};
@@ -61,12 +69,65 @@ int unit_test_foo() {
 	}
 }
 
+int unit_test_add_itemizes_basic()
+{
+    std::vector<std::vector<std::string>> all_itemize = {};
+  	std::vector<Itemize> data = {};
+    std::vector<std::vector<std::string>> correct_all_itemize = {{"\\begin{itemize}", 
+	"\\item bds 7", "\\item sdf 8", "\\end{itemize}"}};
+	std::string text = "\\begin{itemize}\n\\item bds 7\n\\item sdf 8\n\\end{itemize}\n";
+  	Itemize itemizeObj;
+  	Itemize correct_itemizeObj;
+  	Item itemObj7("bds 7");
+  	Item itemObj8("sdf 8");
+  	int ignore_idx;
+
+    read_text(text, &all_itemize);
+	if (!all_itemizes_are_equal(all_itemize, correct_all_itemize))
+	{
+		std::cout << "Failed (read_text): unit_test_foo" << std::endl;
+		return 0;
+	}
+
+    std::tie(ignore_idx, itemizeObj) =  add_itemizes(&correct_all_itemize[0], 0);
+
+  	correct_itemizeObj.add(itemObj7);
+  	correct_itemizeObj.add(itemObj8);
+
+	if (itemizeObj.compare(&correct_itemizeObj) == 0)
+	{
+		std::cout << "Succeeded: unit_test_itemizes_basic" << std::endl;
+		return 1;
+	}
+	else 
+	{
+		std::cout << "Failed: unit_test_itemizes_basic" << std::endl;
+		return 0;
+	}
+}
+
+int unit_test_get_data()
+{
+    std::vector<std::vector<std::string>> all_itemize = {};
+  	std::vector<Itemize> data = {};
+    std::vector<std::vector<std::string>> correct_all_itemize = {{"\\begin{itemize}", "\\item bdsfasdf 7", "asdfdsf 8", 
+    "%%pragma ans Definition", "\\item dfasfew: 9", "\\end{itemize}"}};
+	std::string text = "\\begin{itemize}\n\\item bdsfasdf 7\nasdfdsf 8\n%%pragma ans Definition\n\\item dfasfew: 9\n\\end{itemize}\n";
+
+    read_text(text, &all_itemize);
+	get_data(&all_itemize, &data);
+
+	// TODO: check if the data is correct
+	return 0;
+}
+
 int test_suit_parser()
 {
 	int succeeded = 0;
 	int tests = 0;
 	succeeded += unit_test_all_itemizes_are_equal(); tests++;
-	succeeded += unit_test_foo(); tests++;
+	succeeded += unit_test_read_text(); tests++;
+	succeeded += unit_test_add_itemizes_basic(); tests++;
 	std::cout << "Number of successful tests: " << succeeded << "/" << tests << std::endl;
 	return 1;
 }

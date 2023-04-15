@@ -14,6 +14,7 @@ add_executable(ParseDebug main.cpp)
 add_executable(Tests unit_tests/tests.cpp)
 
 target_compile_options(ParseDebug PRIVATE -g)
+target_compile_options(Tests PRIVATE -g)
 
 add_test(NAME TestParse COMMAND Parse "f" "${path_test_file}" "s")
 
