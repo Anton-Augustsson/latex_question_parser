@@ -110,15 +110,41 @@ int unit_test_get_data()
 {
     std::vector<std::vector<std::string>> all_itemize = {};
   	std::vector<Itemize> data = {};
-    std::vector<std::vector<std::string>> correct_all_itemize = {{"\\begin{itemize}", "\\item bdsfasdf 7", "asdfdsf 8", 
-    "%%pragma ans Definition", "\\item dfasfew: 9", "\\end{itemize}"}};
-	std::string text = "\\begin{itemize}\n\\item bdsfasdf 7\nasdfdsf 8\n%%pragma ans Definition\n\\item dfasfew: 9\n\\end{itemize}\n";
+	std::string text = "\\begin{itemize}\n\\item bdf 1\nasd\n\\item dfas 2\n\\end{itemize}\n"
+					   "\\begin{itemize}\n\\item ssf 3\n\\end{itemize}\n";
+
+  	std::vector<Itemize> correct_data = {};
+  	Itemize correct_itemizeObj1;
+  	Itemize correct_itemizeObj2;
+  	Item itemObj1("bdf 1 asd");
+  	Item itemObj2("dfas 2");
+  	Item itemObj3("ssf 3");
+	correct_itemizeObj1.add(itemObj1);
+	correct_itemizeObj1.add(itemObj2);
+	correct_itemizeObj2.add(itemObj3);
+	correct_data.push_back(correct_itemizeObj1);
+	correct_data.push_back(correct_itemizeObj2);
 
     read_text(text, &all_itemize);
 	get_data(&all_itemize, &data);
 
-	// TODO: check if the data is correct
-	return 0;
+	if (correct_data.size() != data.size())
+	{
+		std::cout << "Failed (wrong size): unit_test_get_data" << std::endl;
+		return 0;
+	}
+
+	for (int i = 0; i < data.size(); i++)
+	{
+		if (data[i].compare(&correct_data[i]) != 0)
+		{
+			std::cout << "Failed: unit_test_get_data" << std::endl;
+			return 0;
+		}
+	}
+
+	std::cout << "Succeeded: unit_test_get_data" << std::endl;
+	return 1;
 }
 
 int test_suit_parser()
@@ -128,6 +154,7 @@ int test_suit_parser()
 	succeeded += unit_test_all_itemizes_are_equal(); tests++;
 	succeeded += unit_test_read_text(); tests++;
 	succeeded += unit_test_add_itemizes_basic(); tests++;
+	succeeded += unit_test_get_data(); tests++;
 	std::cout << "Number of successful tests: " << succeeded << "/" << tests << std::endl;
 	return 1;
 }
